@@ -1,0 +1,195 @@
+name: GitFlow CI/CD Pipeline
+
+on:
+  # Run on pull requests to validate
+  pull_request:
+    branches:
+      - develop
+      - main
+      - 'release/**'
+    paths:
+      - 'notebooks/**'
+      - 'resources/**'
+      - 'databricks.yml'
+      - '.github/workflows/**'
+  
+  # Run on push to trigger deployments
+  push:
+    branches:
+      - develop        # Deploy to dev
+      - main          # Deploy to prod
+      - 'release/**'  # Deploy to staging
+
+env:
+  DATABRICKS_HOST: https://dbc-68f6c19e-2b48.cloud.databricks.com
+
+jobs:
+  # ==========================================
+  # Job 1: Validate Bundle on Pull Request
+  # ==========================================
+  validate:
+    name: Validate Bundle
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+          databricks --version
+      
+      - name: Validate bundle configuration
+        run: |
+          databricks bundle validate
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: Validation Success
+        run: |
+          echo "✅ Bundle validation passed!"
+          echo "Ready to merge and deploy."
+
+  # ==========================================
+  # Job 2: Deploy to DEV Environment
+  # ==========================================
+  deploy-dev:
+    name: Deploy to DEV
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment:
+      name: development
+      url: https://dbc-68f6c19e-2b48.cloud.databricks.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+          databricks --version
+      
+      - name: Deploy to DEV
+        run: |
+          echo "🚀 Deploying to DEV environment..."
+          databricks bundle deploy --target dev
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: Run DEV Pipeline
+        run: |
+          echo "▶️ Running medallion ETL job in DEV..."
+          databricks bundle run medallion_etl_job --target dev
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: DEV Deployment Success
+        run: |
+          echo "✅ DEV deployment completed!"
+          echo "📊 Tables created in: gitflow.gitflow_dev"
+          echo "🔗 Workspace: $DATABRICKS_HOST"
+
+  # ==========================================
+  # Job 3: Deploy to STAGING Environment
+  # ==========================================
+  deploy-staging:
+    name: Deploy to STAGING
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    environment:
+      name: staging
+      url: https://dbc-68f6c19e-2b48.cloud.databricks.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+          databricks --version
+      
+      - name: Deploy to STAGING
+        run: |
+          echo "🚀 Deploying to STAGING environment..."
+          databricks bundle deploy --target staging
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: Run STAGING Pipeline
+        run: |
+          echo "▶️ Running medallion ETL job in STAGING..."
+          databricks bundle run medallion_etl_job --target staging
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: STAGING Deployment Success
+        run: |
+          echo "✅ STAGING deployment completed!"
+          echo "📊 Tables created in: gitflow.gitflow_staging"
+          echo "🔗 Workspace: $DATABRICKS_HOST"
+          echo "⚠️ Ready for QA validation before production release"
+
+  # ==========================================
+  # Job 4: Deploy to PROD Environment
+  # ==========================================
+  deploy-prod:
+    name: Deploy to PRODUCTION
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://dbc-68f6c19e-2b48.cloud.databricks.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+          databricks --version
+      
+      - name: Deploy to PRODUCTION
+        run: |
+          echo "🚀 Deploying to PRODUCTION environment..."
+          databricks bundle deploy --target prod
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: Run PROD Pipeline
+        run: |
+          echo "▶️ Running medallion ETL job in PRODUCTION..."
+          databricks bundle run medallion_etl_job --target prod
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      
+      - name: PROD Deployment Success
+        run: |
+          echo "✅ PRODUCTION deployment completed!"
+          echo "📊 Tables created in: gitflow.gitflow_prod"
+          echo "🔗 Workspace: $DATABRICKS_HOST"
+          echo "🎉 Production release successful!"
