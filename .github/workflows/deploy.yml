@@ -4,7 +4,7 @@ on:
   # Run on pull requests to validate
   pull_request:
     branches:
-      - develop
+      - dev           # Changed from 'develop' to 'dev'
       - main
       - 'release/**'
     paths:
@@ -16,7 +16,7 @@ on:
   # Run on push to trigger deployments
   push:
     branches:
-      - develop        # Deploy to dev
+      - dev           # Changed from 'develop' to 'dev' - Deploy to dev
       - main          # Deploy to prod
       - 'release/**'  # Deploy to staging
 
@@ -63,7 +63,7 @@ jobs:
   deploy-dev:
     name: Deploy to DEV
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'  # Changed from 'develop' to 'dev'
     environment:
       name: development
       url: https://dbc-68f6c19e-2b48.cloud.databricks.com
