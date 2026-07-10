@@ -6,6 +6,7 @@ on:
     branches:
       - dev           # Changed from 'develop' to 'dev'
       - main
+      - release       # Added plain 'release' branch
       - 'release/**'
     paths:
       - 'notebooks/**'
@@ -18,6 +19,7 @@ on:
     branches:
       - dev           # Changed from 'develop' to 'dev' - Deploy to dev
       - main          # Deploy to prod
+      - release       # Added plain 'release' branch - Deploy to staging
       - 'release/**'  # Deploy to staging
 
 env:
@@ -101,7 +103,7 @@ jobs:
   deploy-staging:
     name: Deploy to STAGING
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/release/')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/release/'))
     environment:
       name: staging
       url: https://dbc-68f6c19e-2b48.cloud.databricks.com
