@@ -11,7 +11,7 @@ resources:
       tasks:
         - task_key: bronze_ingestion
           notebook_task:
-            notebook_path: ../notebooks/bronze_ingestion.py
+            notebook_path: ../../notebooks/bronze_ingestion.py
             source: WORKSPACE
           # Use serverless compute (no cluster specification needed)
           
@@ -19,14 +19,14 @@ resources:
           depends_on:
             - task_key: bronze_ingestion
           notebook_task:
-            notebook_path: ../notebooks/silver_transformation.py
+            notebook_path: ../../notebooks/silver_transformation.py
             source: WORKSPACE
           
         - task_key: gold_aggregation
           depends_on:
             - task_key: silver_transformation
           notebook_task:
-            notebook_path: ../notebooks/gold_aggregation.py
+            notebook_path: ../../notebooks/gold_aggregation.py
             source: WORKSPACE
       
       # Pass environment variables to all tasks
