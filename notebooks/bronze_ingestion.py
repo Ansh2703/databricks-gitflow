@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Bronze Layer - Raw Data Ingestion
-# MAGIC 
+# MAGIC
 # MAGIC This notebook ingests raw customer data from Databricks sample datasets.
 # MAGIC No transformations - just load raw data into bronze table.
 
@@ -30,9 +30,7 @@ print(f"Target Schema: {schema}")
 
 # Read sample customer data
 df_raw = spark.read.csv(
-    "/databricks-datasets/retail-org/customers/",
-    header=True,
-    inferSchema=True
+    "/databricks-datasets/retail-org/customers/", header=True, inferSchema=True
 )
 
 print(f"Records read: {df_raw.count()}")
