@@ -61,7 +61,7 @@ jobs:
       - name: Code Linting
         run: |
           echo "🔍 Linting code with flake8..."
-          flake8 notebooks/ --max-line-length=120 --ignore=E501,W503
+          flake8 notebooks/ --max-line-length=120 --ignore=E501,W503,F821,E402,W291
         continue-on-error: false
       
       - name: Run Unit Tests

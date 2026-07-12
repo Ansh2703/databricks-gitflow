@@ -8,12 +8,10 @@
 # COMMAND ----------
 
 # Get environment parameters from job parameters or dbutils widgets
-import sys
-
 try:
     catalog = dbutils.widgets.get("catalog")
     schema = dbutils.widgets.get("schema")
-except:
+except Exception:
     # Fallback for local development
     catalog = "gitflow"
     schema = "gitflow_dev"
