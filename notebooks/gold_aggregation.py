@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Gold Layer - Business-Level Aggregations
-# MAGIC 
+# MAGIC
 # MAGIC This notebook creates analytics-ready tables from silver layer:
 # MAGIC - Customer count by state
 # MAGIC - Summary statistics
@@ -10,12 +10,10 @@
 # COMMAND ----------
 
 # Get environment parameters from job parameters or dbutils widgets
-import sys
-
 try:
     catalog = dbutils.widgets.get("catalog")
     schema = dbutils.widgets.get("schema")
-except:
+except Exception:
     # Fallback for local development
     catalog = "gitflow"
     schema = "gitflow_dev"
@@ -44,13 +42,12 @@ df_silver.display()
 from pyspark.sql.functions import count, current_timestamp
 
 # Aggregate: Customer count by state
-df_gold = df_silver \
-    .groupBy("state") \
-    .agg(
-        count("customer_id").alias("customer_count")
-    ) \
-    .withColumn("report_timestamp", current_timestamp()) \
+df_gold = (
+    df_silver.groupBy("state")
+    .agg(count("customer_id").alias("customer_count"))
+    .withColumn("report_timestamp", current_timestamp())
     .orderBy("customer_count", ascending=False)
+)
 
 print(f"Gold aggregated records: {df_gold.count()}")
 df_gold.display()

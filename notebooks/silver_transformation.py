@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Silver Layer - Data Cleansing and Transformation
-# MAGIC 
+# MAGIC
 # MAGIC This notebook reads from bronze table and applies:
 # MAGIC - Data quality checks (remove nulls)
 # MAGIC - Standardization (trim whitespace, uppercase state codes)
@@ -10,12 +10,10 @@
 # COMMAND ----------
 
 # Get environment parameters from job parameters or dbutils widgets
-import sys
-
 try:
     catalog = dbutils.widgets.get("catalog")
     schema = dbutils.widgets.get("schema")
-except:
+except Exception:
     # Fallback for local development
     catalog = "gitflow"
     schema = "gitflow_dev"
@@ -44,13 +42,14 @@ df_bronze.display()
 from pyspark.sql.functions import col, trim, upper, current_timestamp, current_date
 
 # Data quality transformations
-df_silver = df_bronze \
-    .filter(col("customer_id").isNotNull()) \
-    .filter(col("customer_name").isNotNull()) \
-    .withColumn("customer_name", trim(col("customer_name"))) \
-    .withColumn("state", upper(trim(col("state")))) \
-    .withColumn("processed_timestamp", current_timestamp()) \
+df_silver = (
+    df_bronze.filter(col("customer_id").isNotNull())
+    .filter(col("customer_name").isNotNull())
+    .withColumn("customer_name", trim(col("customer_name")))
+    .withColumn("state", upper(trim(col("state"))))
+    .withColumn("processed_timestamp", current_timestamp())
     .withColumn("processing_date", current_date())
+)
 
 print(f"Silver records after quality checks: {df_silver.count()}")
 df_silver.display()
