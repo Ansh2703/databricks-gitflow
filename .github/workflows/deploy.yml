@@ -21,6 +21,8 @@ on:
       - main          # Deploy to prod
       - release       # Added plain 'release' branch - Deploy to staging
       - 'release/**'  # Deploy to staging
+permissions:
+  contents: write  # Allow pushing tags and commits
 
 permissions:
   contents: write  # Allow pushing tags and commits
