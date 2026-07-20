@@ -22,6 +22,9 @@ on:
       - release       # Added plain 'release' branch - Deploy to staging
       - 'release/**'  # Deploy to staging
 
+permissions:
+  contents: write  # Allow pushing tags and commits
+
 env:
   DATABRICKS_HOST: https://dbc-68f6c19e-2b48.cloud.databricks.com
 
